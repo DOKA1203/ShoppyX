@@ -73,8 +73,16 @@ tasks.withType<ShadowJar> {
     from(project(":discord-sync-bot").extensions.getByType<SourceSetContainer>()["main"].output)*/
 }
 
+tasks.withType<Jar> {
+    archiveClassifier.set("")
+
+    dependsOn(":papermc:jar")
+    from(project(":papermc").extensions.getByType<SourceSetContainer>()["main"].output)
+}
+
 tasks.build {
-    dependsOn("shadowJar")
+    // dependsOn("shadowJar")
+
 }
 
 tasks.processResources {
