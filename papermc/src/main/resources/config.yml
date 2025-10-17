@@ -1,0 +1,15 @@
+database:
+    type: "sqlite"
+    # 밑 Config는 sqlite에선 사용되지 않습니다.
+    host: "192.168.0.113"
+    port: 3306
+    username: "root"
+    password: "YOUR_DB_PASSWORD_HERE"
+    database: "Experiments"
+
+lore:
+    - "<white>[<red>판매가</red>]: <SELL_PRICE>"
+    - "<white>[<yellow>구매가</yellow>]: <BUY_PRICE>"
+    - "<reset>"
+    - "<white>[<red>우클릭</red>]: 판매  <gray><bold>│</bold> <white>[<red>Shift + 우클릭</red>]: 모두 판매"
+    - "<white>[<yellow>좌클릭</yellow>]: 구매  <gray><bold>│</bold> <white>[<yellow>Shift + 좌클릭</yellow>]: 1세트(<MAX_STACK>개) 구매"

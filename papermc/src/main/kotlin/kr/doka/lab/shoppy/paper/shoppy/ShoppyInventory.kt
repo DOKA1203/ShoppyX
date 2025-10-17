@@ -1,6 +1,8 @@
 package kr.doka.lab.shoppy.paper.shoppy
 
+import kr.doka.lab.shoppy.paper.ShoppyPlugin.Companion.instance
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.entity.Player
@@ -8,7 +10,13 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
 
-class ShoppyInventory(val shoppy: Shoppy, val player: Player) : InventoryHolder {
+enum class ShoppyInventoryType {
+    MAIN,
+    EDIT,
+    PRICE,
+}
+
+class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyInventoryType) : InventoryHolder {
     private val inventory: Inventory = Bukkit.createInventory(this, 9, Component.text("Shop - ${shoppy.name}"))
     private var page: Int = 1
 
@@ -41,12 +49,27 @@ class ShoppyInventory(val shoppy: Shoppy, val player: Player) : InventoryHolder 
             inventory.setItem(45 + i, glass)
         }
         inventory.setItem(53, next)
-        // TODO 방향키 제작
+
         if (p != 1) {
             inventory.setItem(45, previous)
         }
-
+        val newLore = instance.config.getStringList("lore")
         shoppy.list.filter { it.page == p }.forEach {
+            if (type != ShoppyInventoryType.EDIT) {
+                val item = it.item.clone()
+                item.itemMeta.apply {
+                    val currentLore = lore()?: mutableListOf()
+                    val newLore = newLore.map { l ->
+                        l.replace("<SELL_PRICE>", it.sellPrice.toString())
+                        l.replace("<BUY_PRICE>", it.buyPrice.toString())
+                        l.replace("<MAX_STACK>", it.item.maxStackSize.toString())
+                    }
+                    newLore.forEach { l ->
+                        currentLore.add(MiniMessage.miniMessage().deserialize(l))
+                    }
+                    lore(currentLore)
+                }
+            }
             inventory.setItem(it.id, it.item)
         }
     }
