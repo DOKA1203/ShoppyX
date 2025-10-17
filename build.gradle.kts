@@ -2,10 +2,10 @@ import com.diffplug.gradle.spotless.SpotlessExtension
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
-    kotlin("jvm") version "2.2.10"
+    kotlin("jvm") version "2.2.20"
     java
     id("com.gradleup.shadow") version "8.3.0"
-    kotlin("plugin.serialization") version "2.2.10"
+    kotlin("plugin.serialization") version "2.2.20"
     id("com.diffplug.spotless") version "6.25.0" apply false
 }
 
@@ -22,9 +22,12 @@ allprojects {
     }
 
     dependencies {
+        //libs
         // compileOnly("io.papermc.paper:paper-api:1.21.8-R0.1-SNAPSHOT")
 
-        implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+        // implementation(libs.kotlin.stdlib)
+
+        // implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
         implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
         implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
 

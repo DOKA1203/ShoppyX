@@ -1,0 +1,36 @@
+# gradle/libs.versions.toml
+
+[versions]
+kotlin = "2.2.20"
+shadow = "8.3.0"
+spotless = "6.25.0"
+
+paper = "1.21.8-R0.1-SNAPSHOT"
+coroutines = "1.10.2"
+serialization = "1.9.0"
+exposed = "0.52.0"
+hikaricp = "5.1.0"
+mariadb = "3.3.3"
+
+[libraries]
+# Kotlin
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk8" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "serialization" }
+
+# PaperMC
+paper-api = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
+
+# Database
+exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
+exposed-dao = { group = "org.jetbrains.exposed", name = "exposed-dao", version.ref = "exposed" }
+exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
+exposed-java-time = { group = "org.jetbrains.exposed", name = "exposed-java-time", version.ref = "exposed" }
+hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
+mariadb-java-client = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
+
+[plugins]
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
