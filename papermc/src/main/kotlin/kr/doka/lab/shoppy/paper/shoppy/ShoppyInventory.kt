@@ -58,12 +58,13 @@ class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyIn
             if (type != ShoppyInventoryType.EDIT) {
                 val item = it.item.clone()
                 item.itemMeta.apply {
-                    val currentLore = lore()?: mutableListOf()
-                    val newLore = newLore.map { l ->
-                        l.replace("<SELL_PRICE>", it.sellPrice.toString())
-                        l.replace("<BUY_PRICE>", it.buyPrice.toString())
-                        l.replace("<MAX_STACK>", it.item.maxStackSize.toString())
-                    }
+                    val currentLore = lore() ?: mutableListOf()
+                    val newLore =
+                        newLore.map { l ->
+                            l.replace("<SELL_PRICE>", it.sellPrice.toString())
+                            l.replace("<BUY_PRICE>", it.buyPrice.toString())
+                            l.replace("<MAX_STACK>", it.item.maxStackSize.toString())
+                        }
                     newLore.forEach { l ->
                         currentLore.add(MiniMessage.miniMessage().deserialize(l))
                     }

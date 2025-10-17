@@ -52,7 +52,7 @@ object ShoppyCommand {
         // Check whether the executor is a player, as you can only set a player's flight speed
         if (executor !is Player) {
             // If a non-player tried to set their own flight speed
-            sender.sendPlainMessage("플레이어만 상점을 사용할 수 있습니다.")
+            sender.sendPlainMessage("플레이어만 상점을 사용할 수 있습니다.1111")
             return Command.SINGLE_SUCCESS
         }
 

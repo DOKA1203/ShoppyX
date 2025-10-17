@@ -18,7 +18,6 @@ class Shoppy(val name: String) {
     val list: ArrayList<ShoppyData> = arrayListOf()
 
     fun open(player: Player) {
-
     }
 
     init {
