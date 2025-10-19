@@ -17,7 +17,8 @@ import kotlin.io.encoding.Base64
 class Shoppy(val name: String) {
     val list: ArrayList<ShoppyData> = arrayListOf()
 
-    fun open(player: Player) {
+    fun open(player: Player, type: ShoppyInventoryType) {
+        ShoppyInventory(this, player, type)
     }
 
     init {

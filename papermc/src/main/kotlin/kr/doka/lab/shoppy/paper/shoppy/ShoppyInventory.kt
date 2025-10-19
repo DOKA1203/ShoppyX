@@ -18,7 +18,7 @@ enum class ShoppyInventoryType {
 
 class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyInventoryType) : InventoryHolder {
     private val inventory: Inventory = Bukkit.createInventory(this, 9, Component.text("Shop - ${shoppy.name}"))
-    private var page: Int = 1
+    var page: Int = 1
 
     init {
         player.openInventory(inventory)
