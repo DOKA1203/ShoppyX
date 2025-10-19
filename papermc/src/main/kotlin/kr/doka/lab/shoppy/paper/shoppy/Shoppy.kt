@@ -17,9 +17,17 @@ import kotlin.io.encoding.Base64
 class Shoppy(val name: String) {
     val list: ArrayList<ShoppyData> = arrayListOf()
 
-    fun open(player: Player, type: ShoppyInventoryType) {
+    fun open(
+        player: Player,
+        type: ShoppyInventoryType,
+    ) {
         ShoppyInventory(this, player, type)
     }
+
+    val maxPage: Int
+        get() {
+            return list.maxOfOrNull { it.page } ?: 0
+        }
 
     init {
         pluginScope.launch {

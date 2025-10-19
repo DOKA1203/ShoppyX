@@ -14,8 +14,8 @@ class ShoppyPlugin : JavaPlugin() {
         CoroutineScope(
             SupervisorJob() +
                 Dispatchers.Default +
-                CoroutineName("DiscordSyncX-PluginScope") +
-                CoroutineExceptionHandler { _, e -> logger.severe("DiscordSyncX-PluginScope - Coroutine error: $e") },
+                CoroutineName("ShoppyX-PluginScope") +
+                CoroutineExceptionHandler { _, e -> logger.severe("ShoppyX-PluginScope - Coroutine error: $e") },
         )
 
     companion object {
