@@ -17,10 +17,11 @@ enum class ShoppyInventoryType {
 }
 
 class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyInventoryType) : InventoryHolder {
-    private val inventory: Inventory = Bukkit.createInventory(this, 9, Component.text("Shop - ${shoppy.name}"))
+    private val inventory: Inventory = Bukkit.createInventory(this, 54, Component.text("Shop - ${shoppy.name}"))
     var page: Int = 1
 
     init {
+        loadPage(page)
         player.openInventory(inventory)
     }
 
@@ -48,11 +49,14 @@ class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyIn
         for (i in 0 until 9) {
             inventory.setItem(45 + i, glass)
         }
-        inventory.setItem(53, next)
+        if (p != shoppy.maxPage) {
+            inventory.setItem(53, next)
+        }
 
         if (p != 1) {
             inventory.setItem(45, previous)
         }
+
         val newLore = instance.config.getStringList("lore")
         shoppy.list.filter { it.page == p }.forEach {
             if (type != ShoppyInventoryType.EDIT) {

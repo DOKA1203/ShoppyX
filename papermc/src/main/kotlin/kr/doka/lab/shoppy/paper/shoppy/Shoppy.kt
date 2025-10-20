@@ -62,23 +62,27 @@ class Shoppy(val name: String) {
 
     fun save() {
         pluginScope.launch {
-            val row = Shops.selectAll().where { Shops.name eq this@Shoppy.name }.singleOrNull()
-            var shopId = row?.get(Shops.id)
-            if (row != null) {
-                shopId =
-                    Shops.insertAndGetId {
-                        it[name] = this@Shoppy.name
-                        it[size] = 54
+            withContext(Dispatchers.IO) {
+                transaction {
+                    val row = Shops.selectAll().where { Shops.name eq this@Shoppy.name }.singleOrNull()
+                    var shopId = row?.get(Shops.id)
+                    if (row != null) {
+                        shopId =
+                            Shops.insertAndGetId {
+                                it[name] = this@Shoppy.name
+                                it[size] = 54
+                            }
                     }
-            }
 
-            list.forEach { shoppyData ->
-                ShopItems.insert {
-                    it[shop] = shopId!!
-                    it[slot] = shoppyData.id
-                    it[itemStackBase64] = Base64.encode(shoppyData.item.serializeAsBytes())
-                    it[sellPrice] = shoppyData.sellPrice // 팔기 불가
-                    it[buyPrice] = shoppyData.buyPrice // 사기만 가능
+                    list.forEach { shoppyData ->
+                        ShopItems.insert {
+                            it[shop] = shopId!!
+                            it[slot] = shoppyData.id
+                            it[itemStackBase64] = Base64.encode(shoppyData.item.serializeAsBytes())
+                            it[sellPrice] = shoppyData.sellPrice // 팔기 불가
+                            it[buyPrice] = shoppyData.buyPrice // 사기만 가능
+                        }
+                    }
                 }
             }
         }

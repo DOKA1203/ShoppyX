@@ -38,9 +38,10 @@ object ShoppyCommand {
 
         val open =
             Commands.literal("열기")
+                .executes(::openShopLogicWithNoName)
                 .then(
                     Commands.argument("name", StringArgumentType.string())
-                        .executes(::createShopLogic),
+                        .executes(::openShopLogic),
                 )
 
         val create =
@@ -51,7 +52,7 @@ object ShoppyCommand {
                 .executes(::openShopLogicWithNoName)
                 .then(
                     Commands.argument("name", StringArgumentType.string())
-                        .executes(::openShopLogic),
+                        .executes(::createShopLogic),
                 )
         val delete =
             Commands.literal("삭제")
@@ -91,17 +92,16 @@ object ShoppyCommand {
         sender.sendMessage("")
         sender.sendMessage(" /상점 열기 <이름> : 상점을 엽니다.")
 
-        if (sender.hasPermission("shoppy.admin"))
-            {
-                sender.sendMessage("$prefix /상점 제작 <이름> : 상점을 제작합니다.")
-                sender.sendMessage("$prefix /상점 삭제 <이름> : 상점을 삭제합니다.")
-                sender.sendMessage("$prefix /상점 목록 : 상점 목록을 확인합니다.")
-                sender.sendMessage("$prefix /상점 설정 <이름> : 상점을 설정합니다.")
-                sender.sendMessage("$prefix /상점 가격설정 <이름> <가격> : 상점 판매가격을 설정합니다.")
+        if (sender.hasPermission("shoppy.admin")) {
+            sender.sendMessage("$prefix /상점 제작 <이름> : 상점을 제작합니다.")
+            sender.sendMessage("$prefix /상점 삭제 <이름> : 상점을 삭제합니다.")
+            sender.sendMessage("$prefix /상점 목록 : 상점 목록을 확인합니다.")
+            sender.sendMessage("$prefix /상점 설정 <이름> : 상점을 설정합니다.")
+            sender.sendMessage("$prefix /상점 가격설정 <이름> <가격> : 상점 판매가격을 설정합니다.")
 
-                sender.sendMessage("$prefix /상점 리로드 : config.yml 을 리로드 합니다.")
-                sender.sendMessage("$prefix 가격설정시 가격에 '0' 를 적을시 가격을 삭제합니다.")
-            }
+            sender.sendMessage("$prefix /상점 리로드 : config.yml 을 리로드 합니다.")
+            sender.sendMessage("$prefix 가격설정시 가격에 '0' 를 적을시 가격을 삭제합니다.")
+        }
         return Command.SINGLE_SUCCESS
     }
 
@@ -125,11 +125,10 @@ object ShoppyCommand {
     private fun openShopLogic(ctx: CommandContext<CommandSourceStack>): Int {
         val sender = ctx.getSource()!!.sender
         val shopName = StringArgumentType.getString(ctx, "name")
-        if (!shops.containsKey(shopName))
-            {
-                sender.sendMessage("상점이 존재하지 않습니다.")
-                return Command.SINGLE_SUCCESS
-            }
+        if (!shops.containsKey(shopName)) {
+            sender.sendMessage("상점이 존재하지 않습니다.")
+            return Command.SINGLE_SUCCESS
+        }
         val shop = shops[shopName]!!
         try {
             shop.open(sender as Player, ShoppyInventoryType.MAIN)
@@ -149,11 +148,10 @@ object ShoppyCommand {
     private fun editShopLogic(ctx: CommandContext<CommandSourceStack>): Int {
         val sender = ctx.getSource()!!.sender
         val shopName = StringArgumentType.getString(ctx, "name")
-        if (!shops.containsKey(shopName))
-            {
-                sender.sendMessage("상점이 존재하지 않습니다.")
-                return Command.SINGLE_SUCCESS
-            }
+        if (!shops.containsKey(shopName)) {
+            sender.sendMessage("상점이 존재하지 않습니다.")
+            return Command.SINGLE_SUCCESS
+        }
         val shop = shops[shopName]!!
         try {
             shop.open(sender as Player, ShoppyInventoryType.EDIT)

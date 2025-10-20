@@ -20,6 +20,7 @@ subprojects {
             maven("https://repo.papermc.io/repository/maven-public/") {
                 name = "papermc-repo"
             }
+            maven("https://jitpack.io")
         }
 
         dependencies {

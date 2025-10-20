@@ -36,23 +36,18 @@ class InventoryListener : Listener {
         val shoppyInventory: ShoppyInventory = holder
         event.isCancelled = true
         val page = shoppyInventory.page
-
-        if (shoppyInventory.type == ShoppyInventoryType.EDIT) {
-            // TODO 페이지 이동일 시, 변경사항 저장.
-            // 45 53 prev, next
-            if (event.slot == 45) { // 이전 창.
-                if (page == 1) return
-
-                savePage(shoppyInventory, inventory, page)
-                shoppyInventory.previousPage()
-            } else if (event.slot == 53) { // 다음 창.
-                if (page == shoppyInventory.shoppy.maxPage) return
-
-                savePage(shoppyInventory, inventory, page)
-                shoppyInventory.nextPage()
-            } else if (event.slot in 46..<53) {
-                return
-            }
+        if (shoppyInventory.type != ShoppyInventoryType.EDIT) return
+        if (event.slot == 45) { // 이전 창.
+            if (page == 1) return
+            savePage(shoppyInventory, inventory, page)
+            shoppyInventory.previousPage()
+        } else if (event.slot == 53) { // 다음 창.
+            if (page == shoppyInventory.shoppy.maxPage) return
+            savePage(shoppyInventory, inventory, page)
+            shoppyInventory.nextPage()
+        } else if (event.slot in 46..<53) {
+            event.isCancelled = false
+            return
         }
     }
 
@@ -67,5 +62,27 @@ class InventoryListener : Listener {
         if (shoppyInventory.type != ShoppyInventoryType.EDIT) return
         // save logic
         savePage(shoppyInventory, inventory, page)
+    }
+
+    @EventHandler
+    fun mainClickHandle(event: InventoryClickEvent) {
+        val inventory = event.clickedInventory ?: return
+        val holder = inventory.getHolder(false) ?: return
+        if (holder !is ShoppyInventory) return
+        val page = holder.page
+        event.isCancelled = true
+
+        if (event.slot == 45) { // 이전 창.
+            if (page == 1) return
+            holder.previousPage()
+        } else if (event.slot == 53) { // 다음 창.
+            if (page == holder.shoppy.maxPage) return
+            holder.nextPage()
+        }
+
+        // TODO 판매 및 구매 구현
+        val l = holder.shoppy.list.filter { it.id == event.slot && it.page == page }
+        if (l.isEmpty())return
+        val item = l[0]
     }
 }

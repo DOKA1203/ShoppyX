@@ -6,6 +6,9 @@ plugins {
 
 dependencies {
     compileOnly(libs.paper.api)
+    compileOnly(libs.vault) {
+        exclude(group = "org.bukkit", module = "bukkit")
+    }
     implementation(libs.sqlite.jdbc)
 }
 

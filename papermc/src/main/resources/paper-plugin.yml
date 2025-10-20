@@ -5,3 +5,9 @@ api-version: '1.21'
 authors: [ DOKA1203 ]
 bootstrapper: kr.doka.lab.shoppy.paper.ShoppyPluginBootstrapper
 loader: kr.doka.lab.shoppy.paper.ShoppyPluginLoader
+
+dependencies:
+    server:
+        Vault:
+            load: BEFORE
+            required: true
