@@ -70,6 +70,8 @@ class InventoryListener : Listener {
         val holder = inventory.getHolder(false) ?: return
         if (holder !is ShoppyInventory) return
         val page = holder.page
+        if (holder.type != ShoppyInventoryType.MAIN) return
+
         event.isCancelled = true
 
         if (event.slot == 45) { // 이전 창.
