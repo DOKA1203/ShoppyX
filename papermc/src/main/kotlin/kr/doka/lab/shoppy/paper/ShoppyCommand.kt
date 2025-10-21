@@ -74,6 +74,11 @@ object ShoppyCommand {
                 .requires {
                     it.sender.hasPermission("shoppy.admin")
                 }
+                .executes(::editShopLogicWithNoName)
+                .then(
+                    Commands.argument("name", StringArgumentType.string())
+                        .executes(::editPriceShopLogic),
+                )
 
         root.then(open)
         root.then(delete)
@@ -165,6 +170,23 @@ object ShoppyCommand {
     private fun editShopLogicWithNoName(ctx: CommandContext<CommandSourceStack>): Int {
         val sender = ctx.getSource()!!.sender
         sender.sendMessage("$prefix /상점 설정 <이름> : 상점을 설정합니다.")
+        return Command.SINGLE_SUCCESS
+    }
+
+    private fun editPriceShopLogic(ctx: CommandContext<CommandSourceStack>): Int {
+        val sender = ctx.getSource()!!.sender
+        val shopName = StringArgumentType.getString(ctx, "name")
+        if (!shops.containsKey(shopName)) {
+            sender.sendMessage("상점이 존재하지 않습니다.")
+            return Command.SINGLE_SUCCESS
+        }
+        val shop = shops[shopName]!!
+        try {
+            shop.open(sender as Player, ShoppyInventoryType.PRICE)
+        } catch (e: Exception) {
+            sender.sendMessage("플레이어만 명령어를 실행 할 수 있습니다.")
+        }
+
         return Command.SINGLE_SUCCESS
     }
 }

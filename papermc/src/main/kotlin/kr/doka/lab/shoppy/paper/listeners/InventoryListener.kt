@@ -1,13 +1,30 @@
 package kr.doka.lab.shoppy.paper.listeners
 
+import io.papermc.paper.connection.PlayerGameConnection
+import io.papermc.paper.dialog.Dialog
+import io.papermc.paper.event.player.PlayerCustomClickEvent
+import io.papermc.paper.registry.data.dialog.ActionButton
+import io.papermc.paper.registry.data.dialog.DialogBase
+import io.papermc.paper.registry.data.dialog.action.DialogAction
+import io.papermc.paper.registry.data.dialog.body.DialogBody
+import io.papermc.paper.registry.data.dialog.input.DialogInput
+import io.papermc.paper.registry.data.dialog.type.DialogType
+import kr.doka.lab.shoppy.paper.ShoppyPlugin.Companion.econ
 import kr.doka.lab.shoppy.paper.shoppy.ShoppyData
 import kr.doka.lab.shoppy.paper.shoppy.ShoppyInventory
 import kr.doka.lab.shoppy.paper.shoppy.ShoppyInventoryType
+import net.kyori.adventure.key.Key
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextColor
+import org.bukkit.ChatColor
+import org.bukkit.Color
+import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
+import java.util.UUID
 
 class InventoryListener : Listener {
     fun savePage(
@@ -17,15 +34,20 @@ class InventoryListener : Listener {
     ) {
         for (i in 0..44) {
             val l = shoppyInventory.shoppy.list.filter { it.id == i && it.page == currentPage }
-            if (l.isEmpty())continue
-            val item = l[0].item
-            if (inventory.getItem(i) == item) continue
-            shoppyInventory.shoppy.list.remove(l[0])
-            // 새로운 아이템이 들어옴.
-            if (inventory.getItem(i) == null) continue
+            if (l.isEmpty()) {
+                if (inventory.getItem(i) == null) continue
 
-            shoppyInventory.shoppy.list.add(ShoppyData(currentPage, i % 9, i / 9, inventory.getItem(i)!!, 0.0, 0.0))
+                shoppyInventory.shoppy.list.add(ShoppyData(currentPage, i % 9, i / 9, inventory.getItem(i)!!, 0.0, 0.0))
+            } else {
+                val item = l[0].item
+                if (inventory.getItem(i) == item) continue
+                shoppyInventory.shoppy.list.remove(l[0])
+                // 새로운 아이템이 들어옴.
+                if (inventory.getItem(i) == null) continue
+                shoppyInventory.shoppy.list.add(ShoppyData(currentPage, i % 9, i / 9, inventory.getItem(i)!!, 0.0, 0.0))
+            }
         }
+        shoppyInventory.shoppy.save()
     }
 
     @EventHandler
@@ -33,21 +55,26 @@ class InventoryListener : Listener {
         val inventory = event.clickedInventory ?: return
         val holder = inventory.getHolder(false) ?: return
         if (holder !is ShoppyInventory) return
-        val shoppyInventory: ShoppyInventory = holder
+
+        if (holder.type != ShoppyInventoryType.EDIT) return
+
+        val page = holder.page
         event.isCancelled = true
-        val page = shoppyInventory.page
-        if (shoppyInventory.type != ShoppyInventoryType.EDIT) return
-        if (event.slot == 45) { // 이전 창.
-            if (page == 1) return
-            savePage(shoppyInventory, inventory, page)
-            shoppyInventory.previousPage()
-        } else if (event.slot == 53) { // 다음 창.
-            if (page == shoppyInventory.shoppy.maxPage) return
-            savePage(shoppyInventory, inventory, page)
-            shoppyInventory.nextPage()
-        } else if (event.slot in 46..<53) {
-            event.isCancelled = false
-            return
+
+        when (event.slot) {
+            45 -> { // 이전 창.
+                if (page == 1) return
+                savePage(holder, inventory, page)
+                holder.previousPage()
+            }
+            53 -> { // 다음 창.
+                // if (page == holder.shoppy.maxPage) return
+                savePage(holder, inventory, page)
+                holder.nextPage()
+            }
+            !in 46..52 -> {
+                event.isCancelled = false
+            }
         }
     }
 
@@ -56,12 +83,9 @@ class InventoryListener : Listener {
         val inventory = event.inventory
         val holder = inventory.getHolder(false) ?: return
         if (holder !is ShoppyInventory) return
-        val shoppyInventory: ShoppyInventory = holder
-        val page = shoppyInventory.page
+        if (holder.type != ShoppyInventoryType.EDIT) return
 
-        if (shoppyInventory.type != ShoppyInventoryType.EDIT) return
-        // save logic
-        savePage(shoppyInventory, inventory, page)
+        savePage(holder, inventory, holder.page)
     }
 
     @EventHandler
@@ -69,8 +93,9 @@ class InventoryListener : Listener {
         val inventory = event.clickedInventory ?: return
         val holder = inventory.getHolder(false) ?: return
         if (holder !is ShoppyInventory) return
-        val page = holder.page
         if (holder.type != ShoppyInventoryType.MAIN) return
+
+        val page = holder.page
 
         event.isCancelled = true
 
@@ -86,5 +111,124 @@ class InventoryListener : Listener {
         val l = holder.shoppy.list.filter { it.id == event.slot && it.page == page }
         if (l.isEmpty())return
         val item = l[0]
+
+        if (event.isLeftClick) { // buy
+
+            if (event.isShiftClick) { // 1set buy
+                val res = econ.withdrawPlayer(event.whoClicked as Player, item.buyPrice * item.item.maxStackSize)
+                if (res.transactionSuccess()) {
+                    event.whoClicked.inventory.addItem(item.item.apply { amount = item.item.maxStackSize })
+                } else {
+                    event.whoClicked.sendMessage("돈 부족")
+                }
+            } else {
+                event.whoClicked.inventory.addItem(item.item)
+            }
+        } else if (event.isRightClick) { // sell
+            if (event.isShiftClick) { // sold all
+            } else {
+            }
+        }
+    }
+
+    @EventHandler
+    fun underClickHandle(event: InventoryClickEvent) {
+        // val player: Player = event.whoClicked as Player
+        val clickedInventory = event.clickedInventory
+        val topInventory = event.view.topInventory
+        val holder = topInventory.getHolder(false) ?: return
+        if (clickedInventory == topInventory)return
+        if (holder !is ShoppyInventory) return
+        // 상점 열기 또는 설정에서 밑 인벤을 눌렀을 때.
+        if (holder.type == ShoppyInventoryType.EDIT)return
+        event.isCancelled = true
+    }
+
+    val hashMap = HashMap<UUID, ShoppyData>()
+
+    @EventHandler
+    fun priceClickHandle(event: InventoryClickEvent) {
+        val inventory = event.clickedInventory ?: return
+        val holder = inventory.getHolder(false) ?: return
+        if (holder !is ShoppyInventory) return
+        if (holder.type != ShoppyInventoryType.PRICE) return
+        if (event.currentItem == null) return
+        event.isCancelled = true
+        // val player = event.whoClicked as Player
+        val s = holder.shoppy.list.filter { it.id == event.slot && it.page == holder.page }
+        if (s.isEmpty()) return
+
+        hashMap[event.whoClicked.uniqueId] = s[0]
+
+        val dialog =
+            Dialog.create { builder ->
+                builder.empty()
+                    .base(
+                        DialogBase.builder(Component.text("선택한 아이템의 가격을 설정하세요"))
+                            .body(
+                                listOf(
+                                    DialogBody.item(s[0].item).build(),
+                                ),
+                            )
+                            .inputs(
+                                listOf(
+                                    DialogInput.text("sell_price", Component.text("판매 가격"))
+                                        .initial(s[0].sellPrice.toString())
+                                        .build(),
+                                    DialogInput.text("buy_price", Component.text("구매 가격"))
+                                        .initial(s[0].buyPrice.toString())
+                                        .build(),
+                                ),
+                            )
+                            .build(),
+                    )
+                    .type(
+                        DialogType.confirmation(
+                            ActionButton.create(
+                                Component.text("설정하기", TextColor.color(0xAEFFC1)),
+                                Component.text("클릭해서 가격을 설정합니다"),
+                                100,
+                                DialogAction.customClick(Key.key("shoppy:user_input/confirm"), null),
+                            ),
+                            ActionButton.create(
+                                Component.text("닫기", TextColor.color(0xFFA0B1)),
+                                Component.text("가격을 설정을 취소합니다."),
+                                100,
+                                null,
+                            ),
+                        ),
+                    )
+            }
+        event.whoClicked.showDialog(dialog)
+    }
+
+    @EventHandler
+    fun handleLevelsDialog(event: PlayerCustomClickEvent) {
+        if (event.identifier != Key.key("shoppy:user_input/confirm")) {
+            return
+        }
+
+        val view = event.dialogResponseView ?: return
+
+        val sellPrice = view.getText("sell_price")!!.toDouble()
+        val buyPrice = view.getText("buy_price")!!.toDouble()
+        val conn = event.commonConnection
+        if (conn is PlayerGameConnection) {
+            val player: Player = conn.player
+
+            val holder = player.openInventory.topInventory.holder
+            if (holder !is ShoppyInventory) return
+
+            val s = hashMap[player.uniqueId] ?: return
+            holder.shoppy.list.remove(s)
+
+            s.sellPrice = sellPrice
+            s.buyPrice = buyPrice
+
+            holder.shoppy.list.add(s)
+            holder.shoppy.save()
+
+            holder.reload()
+        }
     }
 }

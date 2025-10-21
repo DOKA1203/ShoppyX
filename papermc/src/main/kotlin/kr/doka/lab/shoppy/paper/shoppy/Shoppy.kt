@@ -66,7 +66,7 @@ class Shoppy(val name: String) {
                 transaction {
                     val row = Shops.selectAll().where { Shops.name eq this@Shoppy.name }.singleOrNull()
                     var shopId = row?.get(Shops.id)
-                    if (row != null) {
+                    if (row == null) {
                         shopId =
                             Shops.insertAndGetId {
                                 it[name] = this@Shoppy.name
@@ -76,6 +76,7 @@ class Shoppy(val name: String) {
 
                     list.forEach { shoppyData ->
                         ShopItems.insert {
+                            it[page] = shoppyData.page
                             it[shop] = shopId!!
                             it[slot] = shoppyData.id
                             it[itemStackBase64] = Base64.encode(shoppyData.item.serializeAsBytes())

@@ -2,6 +2,7 @@ package kr.doka.lab.shoppy.paper.shoppy
 
 import kr.doka.lab.shoppy.paper.ShoppyPlugin.Companion.instance
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Bukkit
 import org.bukkit.Material
@@ -24,14 +25,14 @@ class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyIn
         loadPage(page)
         player.openInventory(inventory)
     }
-
+    fun reload() = loadPage(page)
     private fun loadPage(p: Int) {
         inventory.clear()
 
         val next = ItemStack.of(Material.ARROW)
         val previous = ItemStack.of(Material.ARROW)
 
-        val glass = ItemStack.of(Material.GLASS_PANE)
+        val glass = ItemStack.of(Material.WHITE_STAINED_GLASS_PANE)
 
         glass.itemMeta =
             glass.itemMeta?.apply {
@@ -39,17 +40,17 @@ class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyIn
             }
         next.itemMeta =
             next.itemMeta?.apply {
-                displayName(Component.text("다음 페이지"))
+                displayName(Component.text("다음 페이지 (p.${p + 1})").decoration(TextDecoration.ITALIC, false))
             }
         previous.itemMeta =
             previous.itemMeta?.apply {
-                displayName(Component.text("이전 페이지"))
+                displayName(Component.text("이전 페이지 (p.${p - 1})").decoration(TextDecoration.ITALIC, false))
             }
 
         for (i in 0 until 9) {
             inventory.setItem(45 + i, glass)
         }
-        if (p != shoppy.maxPage) {
+        if (p != shoppy.maxPage || type == ShoppyInventoryType.EDIT) {
             inventory.setItem(53, next)
         }
 
@@ -61,21 +62,25 @@ class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyIn
         shoppy.list.filter { it.page == p }.forEach {
             if (type != ShoppyInventoryType.EDIT) {
                 val item = it.item.clone()
-                item.itemMeta.apply {
-                    val currentLore = lore() ?: mutableListOf()
-                    val newLore =
-                        newLore.map { l ->
-                            l.replace("<SELL_PRICE>", it.sellPrice.toString())
-                            l.replace("<BUY_PRICE>", it.buyPrice.toString())
-                            l.replace("<MAX_STACK>", it.item.maxStackSize.toString())
+                item.itemMeta =
+                    item.itemMeta.apply {
+                        val currentLore = lore() ?: mutableListOf()
+                        val newLore =
+                            newLore.map { l ->
+                                l.replace("<SELL_PRICE>", it.sellPrice.toString())
+                                    .replace("<BUY_PRICE>", it.buyPrice.toString())
+                                    .replace("<MAX_STACK>", it.item.maxStackSize.toString())
+                            }
+
+                        newLore.forEach { l ->
+                            currentLore.add(MiniMessage.miniMessage().deserialize(l).decoration(TextDecoration.ITALIC, false))
                         }
-                    newLore.forEach { l ->
-                        currentLore.add(MiniMessage.miniMessage().deserialize(l))
+                        lore(currentLore)
                     }
-                    lore(currentLore)
-                }
+                inventory.setItem(it.id, item)
+            } else {
+                inventory.setItem(it.id, it.item)
             }
-            inventory.setItem(it.id, it.item)
         }
     }
 
