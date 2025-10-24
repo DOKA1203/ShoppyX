@@ -16,8 +16,6 @@ import kr.doka.lab.shoppy.paper.shoppy.ShoppyInventoryType
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
-import org.bukkit.ChatColor
-import org.bukkit.Color
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
@@ -28,26 +26,26 @@ import java.util.UUID
 
 class InventoryListener : Listener {
     fun savePage(
-        shoppyInventory: ShoppyInventory,
-        inventory: Inventory,
-        currentPage: Int,
+        shoppy: ShoppyInventory,
+        inv: Inventory,
+        p: Int,
     ) {
         for (i in 0..44) {
-            val l = shoppyInventory.shoppy.list.filter { it.id == i && it.page == currentPage }
+            val l = shoppy.shoppy.list.filter { it.id == i && it.page == p }
             if (l.isEmpty()) {
-                if (inventory.getItem(i) == null) continue
+                if (inv.getItem(i) == null) continue
 
-                shoppyInventory.shoppy.list.add(ShoppyData(currentPage, i % 9, i / 9, inventory.getItem(i)!!, 0.0, 0.0))
+                shoppy.shoppy.list.add(ShoppyData(p, i % 9, i / 9, inv.getItem(i)!!, 0.0, 0.0))
             } else {
                 val item = l[0].item
-                if (inventory.getItem(i) == item) continue
-                shoppyInventory.shoppy.list.remove(l[0])
+                if (inv.getItem(i) == item) continue
+                shoppy.shoppy.list.remove(l[0])
                 // 새로운 아이템이 들어옴.
-                if (inventory.getItem(i) == null) continue
-                shoppyInventory.shoppy.list.add(ShoppyData(currentPage, i % 9, i / 9, inventory.getItem(i)!!, 0.0, 0.0))
+                if (inv.getItem(i) == null) continue
+                shoppy.shoppy.list.add(ShoppyData(p, i % 9, i / 9, inv.getItem(i)!!, 0.0, 0.0))
             }
         }
-        shoppyInventory.shoppy.save()
+        shoppy.shoppy.save()
     }
 
     @EventHandler
@@ -227,7 +225,7 @@ class InventoryListener : Listener {
 
             holder.shoppy.list.add(s)
             holder.shoppy.save()
-
+            hashMap.remove(player.uniqueId)
             holder.reload()
         }
     }

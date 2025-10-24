@@ -25,7 +25,9 @@ class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyIn
         loadPage(page)
         player.openInventory(inventory)
     }
+
     fun reload() = loadPage(page)
+
     private fun loadPage(p: Int) {
         inventory.clear()
 

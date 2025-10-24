@@ -41,6 +41,10 @@ object ShoppyCommand {
                 .executes(::openShopLogicWithNoName)
                 .then(
                     Commands.argument("name", StringArgumentType.string())
+                        .suggests { ctx, builder ->
+                            shops.keys.forEach { builder.suggest(it) }
+                            builder.buildFuture()
+                        }
                         .executes(::openShopLogic),
                 )
 
@@ -67,6 +71,10 @@ object ShoppyCommand {
                 .executes(::editShopLogicWithNoName)
                 .then(
                     Commands.argument("name", StringArgumentType.string())
+                        .suggests { ctx, builder ->
+                            shops.keys.forEach { builder.suggest(it) }
+                            builder.buildFuture()
+                        }
                         .executes(::editShopLogic),
                 )
         val price =
@@ -77,6 +85,10 @@ object ShoppyCommand {
                 .executes(::editShopLogicWithNoName)
                 .then(
                     Commands.argument("name", StringArgumentType.string())
+                        .suggests { ctx, builder ->
+                            shops.keys.forEach { builder.suggest(it) }
+                            builder.buildFuture()
+                        }
                         .executes(::editPriceShopLogic),
                 )
 
