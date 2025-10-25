@@ -38,11 +38,15 @@ class InventoryListener : Listener {
                 shoppy.shoppy.list.add(ShoppyData(p, i % 9, i / 9, inv.getItem(i)!!, 0.0, 0.0))
             } else {
                 val item = l[0].item
-                if (inv.getItem(i) == item) continue
+                val invItem = inv.getItem(i)?.apply {
+                    amount = 1
+                }
+                if (invItem == item) continue
                 shoppy.shoppy.list.remove(l[0])
                 // 새로운 아이템이 들어옴.
-                if (inv.getItem(i) == null) continue
-                shoppy.shoppy.list.add(ShoppyData(p, i % 9, i / 9, inv.getItem(i)!!, 0.0, 0.0))
+                if (invItem == null) continue
+
+                shoppy.shoppy.list.add(ShoppyData(p, i % 9, i / 9, invItem, 0.0, 0.0))
             }
         }
         shoppy.shoppy.save()
