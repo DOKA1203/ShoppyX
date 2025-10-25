@@ -8,8 +8,9 @@ database:
     database: "Experiments"
 
 lore:
-    - "<white>[<red>판매가</red>]: <SELL_PRICE>"
-    - "<white>[<yellow>구매가</yellow>]: <BUY_PRICE>"
-    - "<reset>"
-    - "<white>[<red>우클릭</red>]: 판매  <gray><bold>│</bold> <white>[<red>Shift + 우클릭</red>]: 모두 판매"
-    - "<white>[<yellow>좌클릭</yellow>]: 구매  <gray><bold>│</bold> <white>[<yellow>Shift + 좌클릭</yellow>]: 1세트(<MAX_STACK>개) 구매"
+    price:
+        - "<white>[<red>판매가</red>]: <SELL_PRICE>"
+        - "<white>[<yellow>구매가</yellow>]: <BUY_PRICE>"
+    tips:
+        - "<white>[<red>우클릭</red>]: 판매  <gray><bold>│</bold> <white>[<red>Shift + 우클릭</red>]: 모두 판매"
+        - "<white>[<yellow>좌클릭</yellow>]: 구매  <gray><bold>│</bold> <white>[<yellow>Shift + 좌클릭</yellow>]: 1세트(<MAX_STACK>개) 구매"

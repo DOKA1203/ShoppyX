@@ -60,7 +60,11 @@ class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyIn
             inventory.setItem(45, previous)
         }
 
-        val newLore = instance.config.getStringList("lore")
+        val newLore = instance.config.getStringList("lore.price")
+        if (type != ShoppyInventoryType.PRICE) {
+            newLore.add("<reset>")
+            newLore.addAll(instance.config.getStringList("lore.tips"))
+        }
         shoppy.list.filter { it.page == p }.forEach {
             if (type != ShoppyInventoryType.EDIT) {
                 val item = it.item.clone()
