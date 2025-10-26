@@ -14,3 +14,14 @@ lore:
     tips:
         sell: "<white>[<red>우클릭</red>]: 판매  <gray><bold>│</bold> <white>[<red>Shift + 우클릭</red>]: 모두 판매"
         buy: "<white>[<yellow>좌클릭</yellow>]: 구매  <gray><bold>│</bold> <white>[<yellow>Shift + 좌클릭</yellow>]: 1세트(<MAX_STACK>개) 구매"
+
+messages:
+    buy:
+        success: "아이템을 <yellow><PRICE></yellow>에 성공적으로 구매했습니다."
+        error:
+            not-enough-money: "<red>돈이 부족합니다."
+            inventory-full: "<red>인벤토리가 가득차서 아이템을 구매할 수 없습니다."
+        sell:
+            success: "아이템을 <yellow><PRICE></yellow>에 성공적으로 판매했습니다."
+            error:
+                no-item-to-sell: "<red>판매할 아이템을 가지고 있지 않습니다.</red>"

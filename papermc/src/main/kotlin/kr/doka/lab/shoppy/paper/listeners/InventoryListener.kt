@@ -10,18 +10,22 @@ import io.papermc.paper.registry.data.dialog.body.DialogBody
 import io.papermc.paper.registry.data.dialog.input.DialogInput
 import io.papermc.paper.registry.data.dialog.type.DialogType
 import kr.doka.lab.shoppy.paper.ShoppyPlugin.Companion.econ
+import kr.doka.lab.shoppy.paper.ShoppyPlugin.Companion.instance
 import kr.doka.lab.shoppy.paper.shoppy.ShoppyData
 import kr.doka.lab.shoppy.paper.shoppy.ShoppyInventory
 import kr.doka.lab.shoppy.paper.shoppy.ShoppyInventoryType
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.TextColor
+import net.kyori.adventure.text.minimessage.MiniMessage
+import org.bukkit.Bukkit
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
+import org.bukkit.inventory.ItemStack
 import java.util.UUID
 
 class InventoryListener : Listener {
@@ -105,7 +109,7 @@ class InventoryListener : Listener {
         val page = holder.page
 
         event.isCancelled = true
-
+        val player = event.whoClicked as? Player ?: return
         if (event.slot == 45) { // 이전 창.
             if (page == 1) return
             holder.previousPage()
@@ -120,21 +124,54 @@ class InventoryListener : Listener {
         val item = l[0]
 
         if (event.isLeftClick) { // buy
-
+            var buyAmount = 1
             if (event.isShiftClick) { // 1set buy
-                val res = econ.withdrawPlayer(event.whoClicked as Player, item.buyPrice * item.item.maxStackSize)
-                if (res.transactionSuccess()) {
-                    event.whoClicked.inventory.addItem(item.item.apply { amount = item.item.maxStackSize })
-                } else {
-                    event.whoClicked.sendMessage("돈 부족")
-                }
-            } else {
-                event.whoClicked.inventory.addItem(item.item)
+                buyAmount = item.item.maxStackSize
             }
+            if (econ.getBalance(player) < buyAmount * item.buyPrice) {
+                val msg = instance.config.getString("messages.buy.error.not-enough-money")!!
+                player.sendMessage(MiniMessage.miniMessage().deserialize(msg))
+                return
+            }
+            if (!isCanHold(player, item.item)) {
+                val msg = instance.config.getString("messages.buy.error.inventory-full")!!
+                player.sendMessage(MiniMessage.miniMessage().deserialize(msg))
+                return
+            }
+
+            player.inventory.addItem(
+                item.item.clone().apply {
+                    amount = buyAmount
+                },
+            )
+            val msg = instance.config.getString("messages.buy.success")!!
+            msg.replace("<PRICE>", econ.format(buyAmount * item.buyPrice))
+            player.sendMessage(MiniMessage.miniMessage().deserialize(msg))
         } else if (event.isRightClick) { // sell
-            if (event.isShiftClick) { // sold all
-            } else {
+            val playerAmount =
+                player.inventory.storageContents
+                    .filterNotNull() // null이 아닌 슬롯만 필터링
+                    .filter { it.isSimilar(item.item) } // 비슷한 아이템인지 확인
+                    .sumOf { it.amount }
+            if (playerAmount < 1) {
+                val msg = instance.config.getString("messages.sell.error.no-item-to-sell")!!
+                player.sendMessage(MiniMessage.miniMessage().deserialize(msg))
+                return
             }
+            val amountToSell =
+                if (event.click.isShiftClick) {
+                    playerAmount
+                } else {
+                    1
+                }
+
+            val itemToRemove = item.item.clone().apply { amount = amountToSell }
+            player.inventory.removeItem(itemToRemove)
+
+            econ.depositPlayer(player, item.sellPrice * amountToSell)
+            val msg = instance.config.getString("messages.sell.success")!!
+            msg.replace("<PRICE>", econ.format(amountToSell * item.sellPrice))
+            player.sendMessage(MiniMessage.miniMessage().deserialize(msg))
         }
     }
 
@@ -237,5 +274,14 @@ class InventoryListener : Listener {
             hashMap.remove(player.uniqueId)
             holder.reload()
         }
+    }
+
+    fun isCanHold(
+        player: Player,
+        item: ItemStack,
+    ): Boolean {
+        val testInv = Bukkit.createInventory(null, 36)
+        testInv.contents = player.inventory.storageContents.clone()
+        return testInv.addItem(item).isEmpty()
     }
 }
