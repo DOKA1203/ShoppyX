@@ -60,25 +60,47 @@ class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyIn
             inventory.setItem(45, previous)
         }
 
-        val newLore = instance.config.getStringList("lore.price")
-        if (type != ShoppyInventoryType.PRICE) {
-            newLore.add("<reset>")
-            newLore.addAll(instance.config.getStringList("lore.tips"))
-        }
+
+
+
+
         shoppy.list.filter { it.page == p }.forEach {
             if (type != ShoppyInventoryType.EDIT) {
                 val item = it.item.clone()
                 item.itemMeta =
                     item.itemMeta.apply {
                         val currentLore = lore() ?: mutableListOf()
-                        val newLore =
+                        val newLore = mutableListOf<String>()
+                        if (type == ShoppyInventoryType.PRICE) {
+                            newLore.add(instance.config.getString("lore.price.buy")!!)
+                            newLore.add(instance.config.getString("lore.price.sell")!!)
+                        }
+                        if (it.buyPrice == 0.0 && it.sellPrice == 0.0) {
+                            newLore.add("<red>거래가 불가능한 아이템입니다.")
+                        } else if (it.buyPrice == 0.0) { // 팔기만 가능
+                            newLore.add(instance.config.getString("lore.price.sell")!!)
+                            newLore.add("<reset>")
+                            newLore.add(instance.config.getString("lore.tips.sell")!!)
+                        } else if (it.sellPrice == 0.0) { // 구매만 가능
+                            newLore.add(instance.config.getString("lore.price.buy")!!)
+                            newLore.add("<reset>")
+                            newLore.add(instance.config.getString("lore.tips.buy")!!)
+                        } else {
+                            newLore.add(instance.config.getString("lore.price.buy")!!)
+                            newLore.add(instance.config.getString("lore.price.sell")!!)
+                            newLore.add("<reset>")
+                            newLore.add(instance.config.getString("lore.tips.buy")!!)
+                            newLore.add(instance.config.getString("lore.tips.sell")!!)
+                        }
+
+                        val lore1 =
                             newLore.map { l ->
                                 l.replace("<SELL_PRICE>", it.sellPrice.toString())
                                     .replace("<BUY_PRICE>", it.buyPrice.toString())
                                     .replace("<MAX_STACK>", it.item.maxStackSize.toString())
                             }
 
-                        newLore.forEach { l ->
+                        lore1.forEach { l ->
                             currentLore.add(MiniMessage.miniMessage().deserialize(l).decoration(TextDecoration.ITALIC, false))
                         }
                         lore(currentLore)
