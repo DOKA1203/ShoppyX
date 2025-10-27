@@ -11,12 +11,6 @@ import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.InventoryHolder
 import org.bukkit.inventory.ItemStack
 
-enum class ShoppyInventoryType {
-    MAIN,
-    EDIT,
-    PRICE,
-}
-
 class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyInventoryType) : InventoryHolder {
     private val inventory: Inventory = Bukkit.createInventory(this, 54, Component.text("Shop - ${shoppy.name}"))
     var page: Int = 1
@@ -66,7 +60,7 @@ class ShoppyInventory(val shoppy: Shoppy, val player: Player, val type: ShoppyIn
                 item.itemMeta =
                     item.itemMeta.apply {
                         val currentLore = lore() ?: mutableListOf()
-                        val newLore = mutableListOf<String>()
+                        val newLore = mutableListOf("<reset>")
                         if (type == ShoppyInventoryType.PRICE) {
                             newLore.add(instance.config.getString("lore.price.buy")!!)
                             newLore.add(instance.config.getString("lore.price.sell")!!)

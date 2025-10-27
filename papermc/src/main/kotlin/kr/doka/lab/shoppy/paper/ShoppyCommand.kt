@@ -40,7 +40,7 @@ object ShoppyCommand {
             Commands.literal("열기")
                 .executes(::openShopLogicWithNoName)
                 .then(
-                    Commands.argument("name", StringArgumentType.string())
+                    Commands.argument("name", StringArgumentType.greedyString())
                         .suggests { ctx, builder ->
                             shops.keys.forEach { builder.suggest(it) }
                             builder.buildFuture()
@@ -55,7 +55,7 @@ object ShoppyCommand {
                 }
                 .executes(::openShopLogicWithNoName)
                 .then(
-                    Commands.argument("name", StringArgumentType.string())
+                    Commands.argument("name", StringArgumentType.greedyString())
                         .executes(::createShopLogic),
                 )
         val delete =
@@ -70,7 +70,7 @@ object ShoppyCommand {
                 }
                 .executes(::editShopLogicWithNoName)
                 .then(
-                    Commands.argument("name", StringArgumentType.string())
+                    Commands.argument("name", StringArgumentType.greedyString())
                         .suggests { ctx, builder ->
                             shops.keys.forEach { builder.suggest(it) }
                             builder.buildFuture()
@@ -84,7 +84,7 @@ object ShoppyCommand {
                 }
                 .executes(::editShopLogicWithNoName)
                 .then(
-                    Commands.argument("name", StringArgumentType.string())
+                    Commands.argument("name", StringArgumentType.greedyString())
                         .suggests { ctx, builder ->
                             shops.keys.forEach { builder.suggest(it) }
                             builder.buildFuture()

@@ -27,6 +27,7 @@ import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemStack
 import java.util.UUID
+import kotlin.math.round
 
 class InventoryListener : Listener {
     fun savePage(
@@ -118,7 +119,6 @@ class InventoryListener : Listener {
             holder.nextPage()
         }
 
-        // TODO 판매 및 구매 구현
         val l = holder.shoppy.list.filter { it.id == event.slot && it.page == page }
         if (l.isEmpty())return
         val item = l[0]
@@ -144,9 +144,11 @@ class InventoryListener : Listener {
                     amount = buyAmount
                 },
             )
-            val msg = instance.config.getString("messages.buy.success")!!
-            msg.replace("<PRICE>", econ.format(buyAmount * item.buyPrice))
+            val msg =
+                instance.config.getString("messages.buy.success")!!
+                    .replace("<PRICE>", round(buyAmount * item.buyPrice).toString())
             player.sendMessage(MiniMessage.miniMessage().deserialize(msg))
+            econ.withdrawPlayer(player, buyAmount * item.buyPrice)
         } else if (event.isRightClick) { // sell
             val playerAmount =
                 player.inventory.storageContents
@@ -170,7 +172,7 @@ class InventoryListener : Listener {
 
             econ.depositPlayer(player, item.sellPrice * amountToSell)
             val msg = instance.config.getString("messages.sell.success")!!
-            msg.replace("<PRICE>", econ.format(amountToSell * item.sellPrice))
+            msg.replace("<PRICE>", round(amountToSell * item.sellPrice).toString())
             player.sendMessage(MiniMessage.miniMessage().deserialize(msg))
         }
     }
