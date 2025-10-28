@@ -69,6 +69,15 @@ object ShoppyCommand {
                 .requires {
                     it.sender.hasPermission("shoppy.admin")
                 }
+                .executes(::deleteShopLogicWithNoName)
+                .then(
+                    Commands.argument("name", StringArgumentType.greedyString())
+                        .suggests { ctx, builder ->
+                            shops.keys.forEach { builder.suggest(it) }
+                            builder.buildFuture()
+                        }
+                        .executes(::deleteShopLogic),
+                )
         val edit =
             Commands.literal("설정")
                 .requires {
