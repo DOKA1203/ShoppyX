@@ -124,6 +124,8 @@ class InventoryListener : Listener {
         val item = l[0]
 
         if (event.isLeftClick) { // buy
+            if (item.buyPrice == 0.0)return
+
             var buyAmount = 1
             if (event.isShiftClick) { // 1set buy
                 buyAmount = item.item.maxStackSize
@@ -150,6 +152,8 @@ class InventoryListener : Listener {
             player.sendMessage(MiniMessage.miniMessage().deserialize(msg))
             econ.withdrawPlayer(player, buyAmount * item.buyPrice)
         } else if (event.isRightClick) { // sell
+            if (item.sellPrice == 0.0)return
+
             val playerAmount =
                 player.inventory.storageContents
                     .filterNotNull() // null이 아닌 슬롯만 필터링
