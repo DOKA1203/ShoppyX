@@ -6,11 +6,16 @@ import com.mojang.brigadier.builder.LiteralArgumentBuilder
 import com.mojang.brigadier.context.CommandContext
 import io.papermc.paper.command.brigadier.CommandSourceStack
 import io.papermc.paper.command.brigadier.Commands
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kr.doka.lab.shoppy.paper.ShoppyPlugin.Companion.pluginScope
 import kr.doka.lab.shoppy.paper.database.Shops
 import kr.doka.lab.shoppy.paper.shoppy.Shoppy
 import kr.doka.lab.shoppy.paper.shoppy.ShoppyInventoryType
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -91,13 +96,16 @@ object ShoppyCommand {
                         }
                         .executes(::editPriceShopLogic),
                 )
+        val list =
+            Commands.literal("목록")
+                .executes(::listShopLogic)
 
         root.then(open)
         root.then(delete)
         root.then(create)
         root.then(edit)
         root.then(price)
-
+        root.then(list)
         return root
     }
 
@@ -135,7 +143,7 @@ object ShoppyCommand {
 
         shops[shopName] = s
         s.save()
-
+        sender.sendMessage("상점이 생성되었습니다.")
         return Command.SINGLE_SUCCESS
     }
 
@@ -199,6 +207,40 @@ object ShoppyCommand {
             sender.sendMessage("플레이어만 명령어를 실행 할 수 있습니다.")
         }
 
+        return Command.SINGLE_SUCCESS
+    }
+
+    private fun listShopLogic(ctx: CommandContext<CommandSourceStack>): Int {
+        val sender = ctx.getSource()!!.sender
+
+        var n = 1
+        shopList.forEach {
+            sender.sendMessage("${n++}. $it")
+        }
+
+        return Command.SINGLE_SUCCESS
+    }
+
+    private fun deleteShopLogicWithNoName(ctx: CommandContext<CommandSourceStack>): Int {
+        val sender = ctx.getSource()!!.sender
+        sender.sendMessage("$prefix /상점 삭제 <이름> : 상점을 삭제합니다.")
+        return Command.SINGLE_SUCCESS
+    }
+
+    private fun deleteShopLogic(ctx: CommandContext<CommandSourceStack>): Int {
+        val sender = ctx.getSource()!!.sender
+        val shopName = StringArgumentType.getString(ctx, "name")
+        if (!shops.containsKey(shopName)) {
+            sender.sendMessage("상점이 존재하지 않습니다.")
+            return Command.SINGLE_SUCCESS
+        }
+        val shop = shops[shopName]!!
+        shops.remove(shopName)
+
+        pluginScope.launch(Dispatchers.IO) {
+            transaction { Shops.deleteWhere { Shops.name eq shopName } }
+        }
+        sender.sendMessage("상점이 제거되었습니다.")
         return Command.SINGLE_SUCCESS
     }
 }
