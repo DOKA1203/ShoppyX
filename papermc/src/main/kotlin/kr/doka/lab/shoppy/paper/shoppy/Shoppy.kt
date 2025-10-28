@@ -18,7 +18,7 @@ import kotlin.io.encoding.Base64
 
 class Shoppy(val name: String) {
     val list: ArrayList<ShoppyData> = arrayListOf()
-
+    var shopID: Int = -1
     fun open(
         player: Player,
         type: ShoppyInventoryType,
@@ -41,7 +41,7 @@ class Shoppy(val name: String) {
                     if (shopId == null) {
                         return@transaction
                     }
-
+                    shopID = shopId.value
                     // 해당 상점 ID에 속한 모든 아이템을 조회
                     ShopItems.selectAll().where { ShopItems.shop eq shopId }
                         .map { row ->

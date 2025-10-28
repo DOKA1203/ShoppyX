@@ -64,6 +64,8 @@ class ShoppyPlugin : JavaPlugin() {
         instance = this
 
         Bukkit.getPluginManager().registerEvents(InventoryListener(), this)
+
+
     }
 
     private fun setupEconomy(): Boolean {

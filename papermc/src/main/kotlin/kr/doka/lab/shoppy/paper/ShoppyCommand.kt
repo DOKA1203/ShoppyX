@@ -9,6 +9,7 @@ import io.papermc.paper.command.brigadier.Commands
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kr.doka.lab.shoppy.paper.ShoppyPlugin.Companion.pluginScope
+import kr.doka.lab.shoppy.paper.database.ShopItems
 import kr.doka.lab.shoppy.paper.database.Shops
 import kr.doka.lab.shoppy.paper.shoppy.Shoppy
 import kr.doka.lab.shoppy.paper.shoppy.ShoppyInventoryType
@@ -238,7 +239,10 @@ object ShoppyCommand {
         shops.remove(shopName)
 
         pluginScope.launch(Dispatchers.IO) {
-            transaction { Shops.deleteWhere { Shops.name eq shopName } }
+            transaction {
+                Shops.deleteWhere { Shops.name eq shopName }
+                ShopItems.deleteWhere { ShopItems.shop eq shop.shopID }
+            }
         }
         sender.sendMessage("상점이 제거되었습니다.")
         return Command.SINGLE_SUCCESS
